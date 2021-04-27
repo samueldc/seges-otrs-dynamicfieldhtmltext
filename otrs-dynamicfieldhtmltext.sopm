@@ -15,7 +15,7 @@
         <File Permission="644" Location="Custom/Kernel/Output/HTML/Templates/Standard/AdminDynamicFieldHTMLText.tt"></File>
         <File Permission="644" Location="Custom/Kernel/System/DynamicField/Driver/HTMLText.pm"></File>
         <File Permission="644" Location="Kernel/Config/Files/DynamicFieldHTMLText.xml"></File>
-        <File Permission="644" Location="Kernel/Modules/AdminDynamicFieldHTMLText.pm"></File>
+        <File Permission="644" Location="Custom/Kernel/Modules/AdminDynamicFieldHTMLText.pm"></File>
         <File Permission="644" Location="var/httpd/htdocs/skins/Agent/default/css/thirdparty/seges/DynamicFieldHTMLText.css"></File>
         <File Permission="644" Location="var/httpd/htdocs/skins/Customer/default/css/thirdparty/seges/DynamicFieldHTMLText.css"></File>
     </Filelist>
