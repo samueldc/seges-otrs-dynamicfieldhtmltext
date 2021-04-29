@@ -1,5 +1,6 @@
 # --
 # Copyright (C) 2001-2017 OTRS AG, http://otrs.com/
+# Copyright (C) 2021-2021 Câmara dos Deputados, https://www.camara.leg.br
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -7,8 +8,14 @@
 # --
 
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
-    <h1>[% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]: [% Translate(Data.Mode) | html %] [% Translate(Data.FieldTypeName) | html %] [% Translate("Field") | html %]</h1>
-
+    <h1 class="InvisibleText">[% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]: [% Translate(Data.Mode) | html %] [% Translate(Data.FieldTypeName) | html %] [% Translate("Field") | html %]</h1>
+    [% BreadcrumbPath = [
+            {
+                Name => Translate("DynamicFieldHTMLText"),
+            },
+        ]
+    %]
+    [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
     <div class="Clear"></div>
 
     <div class="SidebarColumn">
@@ -233,7 +240,9 @@
             </div>
             <fieldset class="TableLike">
                 <div class="Field SpacingTop">
-                    <button type="submit" class="Primary CallForAction" value="[% Translate("Submit") | html %]"><span>[% Translate("Submit") | html %]</span></button>
+                    <button class="Primary CallForAction" id="SubmitAndContinue" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save") | html %]</span></button>
+                    [% Translate("or") | html %]
+                    <button class="Primary CallForAction" id="Submit" type="submit" value="[% Translate("Save") | html %]"><span>[% Translate("Save and finish") | html %]</span></button>
                     [% Translate("or") | html %]
                     <a href="[% Env("Baselink") %]Action=AdminDynamicField">[% Translate("Cancel") | html %]</a>
                 </div>

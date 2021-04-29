@@ -2,7 +2,7 @@
 <otrs_package version="1.0">
     <Name>DynamicFieldHTMLText</Name>
     <Version>1.0.0</Version>
-    <Framework>5.x</Framework>
+    <Framework>6.x</Framework>
     <Vendor>Câmara dos Deputados</Vendor>
     <URL>https://www.camara.leg.br/</URL>
     <License>GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007</License>
