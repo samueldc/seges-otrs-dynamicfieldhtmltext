@@ -2,7 +2,7 @@
 <otrs_package version="1.0">
     <Name>DynamicFieldHTMLText</Name>
     <Version>1.0.0</Version>
-    <Framework>5.x</Framework>
+    <Framework>6.x</Framework>
     <Vendor>Câmara dos Deputados</Vendor>
     <URL>https://www.camara.leg.br/</URL>
     <License>GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007</License>
@@ -14,7 +14,7 @@
     <Filelist>
         <File Permission="644" Location="Custom/Kernel/Output/HTML/Templates/Standard/AdminDynamicFieldHTMLText.tt"></File>
         <File Permission="644" Location="Custom/Kernel/System/DynamicField/Driver/HTMLText.pm"></File>
-        <File Permission="644" Location="Kernel/Config/Files/DynamicFieldHTMLText.xml"></File>
+        <File Permission="644" Location="Kernel/Config/Files/XML/DynamicFieldHTMLText.xml"></File>
         <File Permission="644" Location="Custom/Kernel/Modules/AdminDynamicFieldHTMLText.pm"></File>
         <File Permission="644" Location="var/httpd/htdocs/skins/Agent/default/css/thirdparty/seges/DynamicFieldHTMLText.css"></File>
         <File Permission="644" Location="var/httpd/htdocs/skins/Customer/default/css/thirdparty/seges/DynamicFieldHTMLText.css"></File>

@@ -8,31 +8,14 @@
 # --
 
 <div class="MainBox ARIARoleMain LayoutFixedSidebar SidebarFirst">
-    <h1 class="InvisibleText">
-        [% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]:
-        [% USE Title = String(Data.BreadcrumbText) %]
-        [% Title | html %]
-    </h1>
-
+    <h1 class="InvisibleText">[% Translate("Dynamic Fields") | html %] - [% Translate(Data.ObjectTypeName) | html %]: [% Translate(Data.Mode) | html %] [% Translate(Data.FieldTypeName) | html %] [% Translate("Field") | html %]</h1>
     [% BreadcrumbPath = [
             {
-                Name => Translate('Dynamic Fields Management'),
-                Link => 'AdminDynamicField',
+                Name => Translate("DynamicFieldHTMLText"),
             },
         ]
     %]
-
-    [% USE BreadcrumbName = String(Translate(Data.ObjectTypeName)) %]
-
-    [% SWITCH Data.Mode %]
-        [% CASE 'Add' %]
-            [% BreadcrumbPath.push({ Name => BreadcrumbName.append( ': ', Title ) }) %]
-        [% CASE 'Change' %]
-            [% BreadcrumbPath.push({ Name => BreadcrumbName.append( ': ', Title, ' - ', Data.Name ) }) %]
-    [% END %]
-
     [% INCLUDE "Breadcrumb.tt" Path = BreadcrumbPath %]
-
     <div class="Clear"></div>
 
     <div class="SidebarColumn">
@@ -268,3 +251,25 @@
         </form>
     </div>
 </div>
+[% WRAPPER JSOnDocumentComplete %]
+<script type="text/javascript">//<![CDATA[
+$('.ShowWarning').bind('change keyup', function (Event) {
+    $('p.Warning').removeClass('Hidden');
+});
+
+// click handler to remove regex
+$('.RemoveRegEx').bind('click', function () {
+    Core.Agent.Admin.DynamicFieldText.RemoveRegEx( $(this).attr('id') );
+    return false;
+});
+// click handler to add regex
+$('#AddRegEx').bind('click', function () {
+    Core.Agent.Admin.DynamicFieldText.AddRegEx(
+        $(this).closest('fieldset').find('.RegExInsert')
+    );
+    return false;
+});
+
+Core.Agent.Admin.DynamicField.ValidationInit();
+//]]></script>
+[% END %]

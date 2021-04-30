@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<otrs_config version="2.0" init="Framework">
+    <CVS>$Id$</CVS>
+    <Setting Name="DynamicFields::Driver###HTMLText" Required="0" Valid="1">
+        <Description Translatable="1">DynamicField backend registration.</Description>
+        <Navigation>Core::DynamicFields::DriverRegistration</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="DisplayName" Translatable="1">HTMLText</Item>
+                <Item Key="Module">Kernel::System::DynamicField::Driver::HTMLText</Item>
+                <Item Key="ConfigDialog">AdminDynamicFieldHTMLText</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="Frontend::Module###AdminDynamicFieldHTMLText" Required="0" Valid="1">
+        <Description Translatable="1">Frontend module registration for the agent interface.</Description>
+        <Navigation>Frontend::Admin::ModuleRegistration</Navigation>
+        <Value>
+            <Item ValueType="FrontendRegistration">
+                <Hash>
+                    <Item Key="GroupRo">
+                        <Array>
+                        </Array>
+                    </Item>
+                    <Item Key="Group">
+                        <Array>
+                            <Item>admin</Item>
+                        </Array>
+                    </Item>
+                    <Item Key="Description">Admin</Item>
+                    <Item Key="Title" Translatable="1">Dynamic Fields Reference ConfigItem Backend GUI</Item>
+                    <Loader>
+                        <Item Key="CSS">Core.Agent.Admin.DynamicField.css</Item>
+                        <Item Key="JavaScript">Core.Agent.Admin.DynamicField.js</Item>
+                        <Item Key="JavaScript">Core.Agent.Admin.DynamicFieldDropdown.js</Item>
+                    </Loader>
+                    <Item Key="NavBarName"></Item>
+                </Hash>
+            </Item>
+        </Value>
+    </Setting>
+    <Setting Name="Frontend::Navigation###AdminDynamicFieldHTMLText###001-DynamicFieldHTMLText" Required="0" Valid="0">
+        <Description Translatable="1">Main menu item registration.</Description>
+        <Navigation>Frontend::Admin::ModuleRegistration::MainMenu</Navigation>
+        <Value>
+            <Array>
+                <DefaultItem ValueType="FrontendNavigation">
+                    <Hash>
+                    </Hash>
+                </DefaultItem>
+            </Array>
+        </Value>
+    </Setting>
+
+    <Setting Name="Loader::Customer::CommonCSS###900-DynamicFieldHTMLText" Required="1" Valid="1">
+        <Description Translatable="1">List of CSS files to always be loaded for the customer interface.</Description>
+        <Navigation>Frontend::Customer::ModuleRegistration</Navigation>
+        <Value>
+            <Array>
+                <Item>thirdparty/seges/DynamicFieldHTMLText.css</Item>
+            </Array>
+        </Value>
+    </Setting>
+    <Setting Name="Loader::Agent::CommonCSS###900-DynamicFieldHTMLText" Required="1" Valid="1">
+        <Description Translatable="1">List of CSS files to always be loaded for the agent interface.</Description>
+        <Navigation>Frontend::Agent::ModuleRegistration</Navigation>
+        <Value>
+            <Array>
+                <Item>thirdparty/seges/DynamicFieldHTMLText.css</Item>
+            </Array>
+        </Value>
+    </Setting>
+</otrs_config>

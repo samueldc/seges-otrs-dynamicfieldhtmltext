@@ -1,0 +1,303 @@
+---
+- name: configure local machine for me
+  hosts: all
+  become: yes
+
+  vars_prompt:
+    
+    - name: mysql_password
+      prompt: MySQL password
+      default: root
+
+  tasks:
+
+  # configure application
+  
+  - name: disable ubuntu apparmor
+    service:
+      name: apparmor
+      enabled: no
+      state: stopped
+
+  - name: install apache web server
+    apt:
+      name:
+      - apache2
+      - libapache2-mod-perl2
+      state: present
+
+#  - name: download, unpack and install otobo
+#    unarchive:
+#      src: https://ftp.otobo.org/pub/otobo/otobo-latest-10.0.tar.gz
+#      dest: /opt/otobo
+#      group: www-data
+#      owner: otobo
+#      remote_src: yes
+#      extra_opts: 
+#      - --strip-components=1
+#      creates: /opt/otobo/Kernel
+#
+  - name: checkout git repository
+    git:
+      repo: https://github.com/znuny/Znuny.git
+      force: yes
+      dest: /opt/otrs
+
+  - name: configure otrs user
+    user:
+      append: yes
+      comment: OTRS user
+      groups: 
+      - www-data 
+      home: /opt/otrs
+      name: otrs
+      shell: /bin/bash
+      state: present
+      system: yes
+
+  - name: allow su - otrs without password
+    lineinfile:
+      path: "/etc/sudoers"
+      line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+      state: present
+      validate: /usr/sbin/visudo -cf %s
+
+  - name: install perl modules
+    apt:
+      name:
+      - libarchive-zip-perl 
+      - libdatetime-perl 
+      - libdbi-perl 
+      - libmoo-perl 
+      - libnet-dns-perl 
+      - libtemplate-perl 
+      - libtemplate-perl 
+      - libxml-libxml-perl 
+      - libyaml-libyaml-perl
+      - libdbd-mysql-perl
+      state: present
+
+  - name: activate the default configuration file
+    copy:
+      src: /opt/otrs/Kernel/Config.pm.dist 
+      dest: /opt/otrs/Kernel/Config.pm
+      remote_src: yes
+
+  - name: change otrs directory permissions
+    file:
+      path: /opt/otrs
+      state: directory
+      owner: otrs
+      group: www-data
+      recurse: yes
+
+  - name: install perl tidy all module
+    apt:
+      name: libcode-tidyall-perl
+
+  - name: activate apache modules
+    shell: a2enmod perl && a2enmod deflate && a2enmod filter && a2enmod headers
+
+  - name: configure apache for otrs
+    file:
+      src: /opt/otrs/scripts/apache2-httpd.include.conf
+      path: /etc/apache2/sites-enabled/zzz_otrs.conf
+      state: link
+      remote_src: yes
+
+  - name: whitelist otrs directory in apache configuration
+    blockinfile:
+      path: /etc/apache2/apache2.conf
+      marker: "# {mark} OTRS APACHE WHITELIST"
+      insertafter: EOF
+      block: |
+        <Directory /opt/otrs/>
+          Options Indexes FollowSymLinks
+          AllowOverride None
+          Require all granted
+        </Directory>
+
+  - name: restart apache
+    service:
+      name: apache2
+      enabled: yes
+      state: restarted
+
+  - name: make tmp directory that Cron.sh expects
+    file:
+      path: /opt/otrs/var/tmp
+      state: directory
+      owner: otrs
+      group: www-data
+  
+  - name: configure cron jobs for the otrs user
+    shell: |
+      cd /opt/otrs/var/cron/
+      for foo in *.dist; do cp $foo `basename $foo .dist`; done
+      cd /opt/otrs
+      bin/Cron.sh start otrs
+
+  - name: install bash auto-completion
+    apt:
+      name: bash-completion
+
+  - name: fix permissions
+    shell: /opt/otrs/bin/otrs.SetPermissions.pl
+
+  # configure database
+  
+  - name: install gnupg
+    apt: 
+      name: gnupg
+  
+  - name: pre configure mysql apt config repo distro
+    debconf:
+      name: mysql-apt-config
+      question: mysql-apt-config/repo-distro
+      value: debian
+      vtype: select
+
+  - name: pre configure mysql apt config select server
+    debconf:
+      name: mysql-apt-config
+      question: mysql-apt-config/select-server
+      value: mysql-5.7
+      vtype: select
+
+  - name: pre configure mysql apt config select product
+    debconf:
+      name: mysql-apt-config
+      question: mysql-apt-config/select-product
+      value: Ok
+      vtype: select
+
+  - name: pre configure mysql community server root pass
+    debconf:
+      name: mysql-community-server
+      question: mysql-community-server/root-pass
+      value: "{{ mysql_password }}"
+      vtype: password
+    no_log: true
+
+  - name: pre configure mysql community server re root pass
+    debconf:
+      name: mysql-community-server
+      question: mysql-community-server/re-root-pass
+      value: "{{ mysql_password }}"
+      vtype: password
+    no_log: true
+
+#  - name: pre configure mysql community server data dir
+#    debconf:
+#      name: mysql-community-server
+#      question: mysql-community-server/data-dir
+#      value: 
+#      vtype: note
+#
+#  - name: set selections for mysql-apt-config
+#    shell: |
+#      debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-distro select debian'
+#      debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-server select mysql-5.7'
+#      debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-product select Ok'
+#      debconf-set-selections <<< 'mysql-community-server mysql-community-server/root-pass password {{ mysql_password }}'
+#      debconf-set-selections <<< 'mysql-community-server mysql-community-server/re-root-pass password {{ mysql_password }}'
+#      debconf-set-selections <<< 'mysql-community-server mysql-community-server/data-dir'
+#
+  - name: install mysql-apt-config
+    apt: 
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.16-1_all.deb
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+
+  - name: update apt cache
+    apt:
+      update_cache: yes
+    ignore_errors: yes
+
+  - name: install mysql-server
+    apt: 
+      name: mysql-server
+      state: present
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+
+  - name: install expect module dependencies
+    apt:
+      name: 
+      - python3-pip
+      - virtualenv
+
+  - name: install expect python dependecies
+    pip:
+      name: 
+      - pexpect
+      - setuptools
+
+  - name: change mysql root authentication to native
+    expect: 
+      command: mysql -u root -p -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{ mysql_password }}';"
+      responses:
+        (?i)password: "{{ mysql_password }}"
+#    no_log: true
+
+#  - name: create mysql remote root user
+#    expect: 
+#      command: mysql -u root -p -e "CREATE USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '{{ mysql_password }};"
+#      responses:
+#        (?i)password: "{{ mysql_password }}"
+#    no_log: true
+#
+#  - name: create mysql remote root user
+#    expect: 
+#      command: mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;"
+#      responses:
+#        (?i)password: "{{ mysql_password }}"
+#    no_log: true
+#
+  - name: install pymysql
+    apt:
+      name: python3-pymysql
+
+  - name: create mysql remote root user
+    mysql_user:
+      login_user: root
+      login_password: "{{ mysql_password }}"
+      name: root
+      host: "%"
+      password: "{{ mysql_password }}"
+      priv: '*.*:ALL,GRANT'
+      append_privs: yes
+
+  - name: configure mysqld variables
+    blockinfile:
+      path: /etc/mysql/conf.d/mysql.cnf
+      marker: "# {mark} MYSQLD VARIABLES"
+      insertafter: EOF
+      block: |
+        [mysqld]
+        max_allowed_packet = 64M
+        innodb_log_file_size = 256M
+        query_cache_size = 32M
+        character_set_server = utf8
+        collation_server = utf8_general_ci
+
+  - name: configure mysqldump variables
+    blockinfile:
+      path: /etc/mysql/conf.d/mysqldump.cnf
+      marker: "# {mark} MYSQLDUMP VARIABLES"
+      insertafter: EOF
+      block: |
+        max_allowed_packet = 64M
+
+  - name: allow remote connections
+    lineinfile:
+      path: /etc/mysql/mysql.conf.d/mysqld.cnf
+      regexp: '^bind-address.*$'
+      line: '#bind-address = 127.0.0.1'
+      state: present
+
+  - name: restart mysql service
+    service:
+      name: mysql
+      enabled: yes
+      state: restarted
