@@ -1,1 +1,5 @@
 .vagrant
+.ansible
+.gnupg
+.bash_history
+*.opm
